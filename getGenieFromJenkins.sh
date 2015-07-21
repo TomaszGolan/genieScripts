@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export GENIE_BUILDS=/grid/fermiapp/genie/builds
+
 url="https://buildmaster.fnal.gov/view/GENIE/job/jenkinsTest/lastSuccessfulBuild/artifact/GENIE/"
 artifacts=(`curl -s -F "web=/dev/null;type=text/html" ${url} \
   | sed -e 's/<\/a>/<\/a>\n/g' \
@@ -21,14 +23,14 @@ buildExist() # check is build is available
 
 getBuild() # getbuild genie_version build_date
 {
-  if [ -z $1 ]
+  if [ -z $1 ] # genie_version is not specified (take the most recent build)
   then
     build="$(echo "${artifacts[*]}" | sed -e 's/\s\s*/\n/g' | sort | tail -n 1)"
     if buildExist $build
     then echo; echo "GENIE version was not specified. Getting the last build: $build"
     else echo; echo "Can not find the build."; listOfBuilds
     fi
-  elif [ -z $2 ]
+  elif [ -z $2 ] # build_date is not specified (take the most for given version)
   then
     build="$(echo "${artifacts[*]}" | sed -e 's/\s\s*/\n/g' | sed '/'$1'/!d' | sort | tail -n 1)"
     if buildExist $build
@@ -43,19 +45,31 @@ getBuild() # getbuild genie_version build_date
     fi
   fi
 
-  echo; curl -\# -O ${url}/$build
+  echo; 
+  
+  if [ ! -f $GENIE_BUILDS/$build ] # check if the build already exists
+  then
+    curl -\# -O ${url}/$build
+    mv $build $GENIE_BUILDS
+    export LAST_GENIE_BUILD="${build%%.*}" # set up env variable so other scripts can refer to
+  fi
 }
 
-getAllBuilds() # get all buils from url
+getAllBuilds() # get all builds 
 {
   for (( k = 0; k < ${#artifacts[@]}; k++ ))
   do
-    echo; echo "Getting: ${artifacts[$k]}"; echo
-    curl -\# -O ${url}/${artifacts[$k]}
+    if [ ! -f ${artifacts[$k]} ]
+    then
+      echo; echo "Getting: ${artifacts[$k]}"; echo
+      curl -\# -O ${url}/${artifacts[$k]}
+      mv ${artifacts[$k]} $GENIE_BUILDS
+    fi
+    
   done
 }
 
-listOfBuilds() # list available builds
+listOfBuilds() # list of available builds
 {
   echo; echo "List of available builds:"; echo
 
