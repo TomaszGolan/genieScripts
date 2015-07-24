@@ -22,7 +22,7 @@ source /grid/fermiapp/genie/scripts/setupGENIE.sh $build
 
 mkdir -p jobOutput/splines
 
-$GENIE/bin/gmkspl -p $particle -t $target -o 'jobOutput/particle_'$particle'_target_'$target'_'$build'.xml' --event-generator-list CCQE
+$GENIE/bin/gmkspl -p $particle -t $target -o 'jobOutput/splines/particle_'$particle'_target_'$target'_'$build'.xml' --event-generator-list CCQE
 
 source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups.sh
 setup ifdhc

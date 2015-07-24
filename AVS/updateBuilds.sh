@@ -14,7 +14,7 @@ rm ''$LAST_GENIE_BUILD'.tgz'
 
 cd $GENIE_SCRIPTS
 
-#sleep 12h
+sleep 12h
 
 ./submitGENIE.sh -s 'generateSplines.sh' -o '-p 14 -t 1000060120' -x onsite
 #./submitGENIE.sh -s 'generateSplines.sh' -o '-p 14 -t 1000060120'
